@@ -1,0 +1,268 @@
+{
+  "name": "n8n-challenge",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {
+          "customEmailConfig": "[ [\"HEADER\", \"SUBJECT\", \"New Lead Information\"] ]",
+          "forceReconnect": 1
+        }
+      },
+      "id": "7c373118-3b28-4e18-a30a-2bd9f9c0398e",
+      "name": "Email Trigger (IMAP)",
+      "type": "n8n-nodes-base.emailReadImap",
+      "typeVersion": 2,
+      "position": [
+        420,
+        -80
+      ],
+      "credentials": {
+        "imap": {
+          "id": "HcM5fc30NFbvdkiZ",
+          "name": "IMAP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Array for storing the data extracted from all mails\nconst results = [];\n\n// Required properties\nconst requiredFields = [\n  'First Name',\n  'Last Name',\n  'Email',\n  'Company',\n  'Title',\n  'Phone Number',\n  'Lead Source',\n  'Lead Status'\n];\n\n// Traverses through each entry of the input node\ntry {\n  for (const item of $input.all()) {\n    const body = item.json.textPlain || '';\n\n    // Initializes an object to store the key-value pairs of this mailing\n    const extractedData = {};\n\n    // Divide the mail body into lines\n    const lines = body.split('\\n');\n\n    // Goes through each line and divides into key and value\n    for (const line of lines) {\n      const [field, value] = line.split(':').map(s => s.trim()); // Separates field and value\n      if (field && value) {\n        extractedData[field] = value;\n      }\n    }\n\n    // Checks if the object contains all required properties\n    const hasAllRequiredFields = requiredFields.every(field => extractedData.hasOwnProperty(field));\n\n    if (hasAllRequiredFields) {\n      // Add the object with the key-value pairs to the result array if it complies with the validation.\n      results.push({ json: extractedData });\n    }\n  }\n} catch (error) {\n  // If an error occurs, it returns an object with the error message\n  return [{ json: { Error: `Error processing data: ${error.message}` } }];\n}\n\n// Returns the array of results\nreturn results;\n"
+      },
+      "id": "4fc1415b-f4d6-45db-97e9-fe6f07a05b92",
+      "name": "Code",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1000,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1pII_eEyVkJe6m0DZlUMzMsxsinDgXSD7DoBT-ZOs1GA",
+          "mode": "list",
+          "cachedResultName": "Test Leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1pII_eEyVkJe6m0DZlUMzMsxsinDgXSD7DoBT-ZOs1GA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Hoja 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1pII_eEyVkJe6m0DZlUMzMsxsinDgXSD7DoBT-ZOs1GA/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "First Name": "={{ $json['First Name'] }}",
+            "Last Name": "={{ $json['Last Name'] }}",
+            "Email": "={{ $json.Email }}",
+            "Company": "={{ $json.Company }}",
+            "Title": "={{ $json.Title }}",
+            "Phone Number": "={{ $json['Phone Number'] }}",
+            "Lead Source": "={{ $json['Lead Source'] }}",
+            "Lead Status": "={{ $json['Lead Status'] }}"
+          },
+          "matchingColumns": [
+            "test"
+          ],
+          "schema": [
+            {
+              "id": "First Name",
+              "displayName": "First Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Last Name",
+              "displayName": "Last Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Company",
+              "displayName": "Company",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Title",
+              "displayName": "Title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Phone Number",
+              "displayName": "Phone Number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Lead Source",
+              "displayName": "Lead Source",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Lead Status",
+              "displayName": "Lead Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "0070058a-3a37-475d-b630-80d39cd48deb",
+      "name": "Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1680,
+        -80
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Pn3oGhC6YksNHMAT",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "This node collects all emails with the subject “New Lead Information”, the body of each email contains the necessary data to, after filtering it, add it to Google Sheets.\n\nNode configuration:\n\n-Enter credentials of the email from which we are going to extract the data.\n\n-In the options, as “Custom Email Rules” add [ [ [“HEADER”, “SUBJECT”, “New Lead Information”] ] so that it only brings the data of the emails where the subject is “New Lead Information”.\n\n",
+        "height": 242.12590460883894,
+        "width": 469.8164778176994
+      },
+      "id": "863cda67-e0e4-4330-b565-ddff37cae47c",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        240,
+        -340
+      ]
+    },
+    {
+      "parameters": {
+        "content": "This node receives a script made in Javascript to filter the data and have it ready to add to the Google Sheets.\n\nThe script is inside a try/catch to handle errors and is validated in such a way that only the data with the required properties is filtered.",
+        "height": 166.83848090821442,
+        "width": 298.0908798707154
+      },
+      "id": "3b2ea0d0-7c60-4f95-ae27-ed7576ea6535",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        900,
+        -267.51669451098394
+      ]
+    },
+    {
+      "parameters": {
+        "content": "This node receives the filtered data and adds it to the Google Sheets.\n\nConfiguration of the node parameters:\n\n-Enter credentials.\n-In “Operation” select the option “Append Row”.\n-Under “Document” choose the document to use.\n-In “Sheet” select the sheet to use.\n-In “Mapping Column Mode” select the option “Map Each Column Manually” and Drag each value to its corresponding input.",
+        "height": 208.59374929171454,
+        "width": 542.0959928341897
+      },
+      "id": "bf15d02f-487f-425a-8eb0-7e0d5093844a",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1460,
+        -310.01335560878715
+      ]
+    },
+    {
+      "parameters": {
+        "content": "-Report\n\nIn this Workflow my approach was as follows:\n\n1- Collect emails containing the subject “New Lead Information”.\n2- Filter the data in the body of each email using a Javascript script.\n3- Enter the filtered data into a Google Sheets document.\n\nThe biggest challenge I faced was to configure each node since I had never worked with n8n before. For example when I had to configure the “Email Trigger” node to only collect emails with the subject “New Lead Information”. To learn how to do it I went to the official documentation where I found the solution.\n\n ",
+        "height": 259.8664439121296,
+        "width": 485.0099336436435
+      },
+      "id": "56b42466-4df3-418e-8a4a-958be5d77101",
+      "name": "Sticky Note3",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        800,
+        120
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Email Trigger (IMAP)": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "b4afc1a9-2659-4ba5-a814-33ff3cf460c7",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "215600df2eff62862437aa32b01b3bd31445f2b7f88da1796a89e4de7d93166f"
+  },
+  "id": "2JlBj8cqdDCjnqCV",
+  "tags": []
+}
